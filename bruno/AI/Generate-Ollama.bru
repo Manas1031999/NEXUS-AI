@@ -1,0 +1,18 @@
+meta {
+  name: Generate Response - Ollama
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/v1/ai/generate
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "prompt": "What is Java?",
+    "provider": "ollama"
+  }
+}
