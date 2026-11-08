@@ -1,0 +1,18 @@
+meta {
+  name: Generate Gemini
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:8080/api/v1/ai/generate
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "prompt": "Explain Spring Boot dependency injection in 3 simple points.",
+    "provider": "gemini"
+  }
+}
