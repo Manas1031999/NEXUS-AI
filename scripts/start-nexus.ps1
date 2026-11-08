@@ -10,6 +10,20 @@ if ([string]::IsNullOrWhiteSpace($env:DB_PASSWORD)) {
     ).Password
 }
 
+
+# Load Gemini API key securely
+if ([string]::IsNullOrWhiteSpace($env:GEMINI_API_KEY)) {
+    $secureGeminiKey = Read-Host "Enter Gemini API key" -AsSecureString
+    $env:GEMINI_API_KEY = [System.Net.NetworkCredential]::new(
+        "",
+        $secureGeminiKey
+    ).Password
+}
+
+if ([string]::IsNullOrWhiteSpace($env:GEMINI_API_KEY)) {
+    throw "Gemini API key is required."
+}
+
 $ProjectRoot = Split-Path -Parent $PSScriptRoot
 $BackendPath = Join-Path $ProjectRoot "backend\nexus-ai"
 $PostgresService = "postgresql-x64-18"
