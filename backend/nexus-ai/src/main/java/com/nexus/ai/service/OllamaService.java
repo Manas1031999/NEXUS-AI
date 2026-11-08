@@ -1,4 +1,3 @@
-
 package com.nexus.ai.service;
 
 import com.nexus.ai.dto.AiResponse;
@@ -13,7 +12,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.Map;
 
 @Service
-public class OllamaService {
+public class OllamaService implements AiProvider {
 
     private final RestClient restClient;
     private final String model;
@@ -26,6 +25,7 @@ public class OllamaService {
         this.model = model;
     }
 
+    @Override
     public AiResponse generateResponse(String prompt) {
 
         Map<String, Object> request = Map.of(
@@ -37,7 +37,9 @@ public class OllamaService {
                         "num_ctx", 1024,
                         "num_predict", 120,
                         "num_thread", 2,
-                        "temperature", 0.3));
+                        "temperature", 0.3
+                )
+        );
 
         try {
 
@@ -50,21 +52,29 @@ public class OllamaService {
             if (result == null || result.get("response") == null) {
                 throw new ResponseStatusException(
                         HttpStatus.BAD_GATEWAY,
-                        "Empty response received from Ollama");
+                        "Empty response received from Ollama"
+                );
             }
 
             return new AiResponse(
                     "NEXUS AI",
-                    "ollama",
+                    getProviderName(),
                     model,
                     result.get("response").toString(),
-                    "SUCCESS");
+                    "SUCCESS"
+            );
 
         } catch (RestClientException ex) {
 
             throw new ResponseStatusException(
                     HttpStatus.BAD_GATEWAY,
-                    "Unable to communicate with Ollama");
+                    "Unable to communicate with Ollama"
+            );
         }
+    }
+
+    @Override
+    public String getProviderName() {
+        return "ollama";
     }
 }

@@ -1,6 +1,7 @@
 package com.nexus.ai.dto;
 
 public record AiRequest(
-    String prompt
+        String prompt,
+        String provider
 ) {
 }

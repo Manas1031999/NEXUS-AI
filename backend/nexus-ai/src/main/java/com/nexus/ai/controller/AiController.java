@@ -2,7 +2,9 @@ package com.nexus.ai.controller;
 
 import com.nexus.ai.dto.AiRequest;
 import com.nexus.ai.dto.AiResponse;
-import com.nexus.ai.service.OllamaService;
+import com.nexus.ai.dto.ProviderResponse;
+import com.nexus.ai.service.AiProvider;
+import com.nexus.ai.service.AiProviderManager;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -12,10 +14,10 @@ import org.springframework.web.server.ResponseStatusException;
 @RequestMapping("/api/v1/ai")
 public class AiController {
 
-    private final OllamaService ollamaService;
+    private final AiProviderManager providerManager;
 
-    public AiController(OllamaService ollamaService) {
-        this.ollamaService = ollamaService;
+    public AiController(AiProviderManager providerManager) {
+        this.providerManager = providerManager;
     }
 
     @PostMapping("/generate")
@@ -27,10 +29,23 @@ public class AiController {
 
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
-                    "Prompt cannot be empty"
-            );
+                    "Prompt cannot be empty");
         }
 
-        return ollamaService.generateResponse(request.prompt());
+        String providerName = request.provider() == null
+                || request.provider().isBlank()
+                        ? "ollama"
+                        : request.provider().trim().toLowerCase();
+
+        AiProvider provider = providerManager.getProvider(providerName);
+
+        return provider.generateResponse(request.prompt());
+    }
+
+    @GetMapping("/providers")
+    public ProviderResponse getProviders() {
+
+        return new ProviderResponse(
+                providerManager.getAvailableProviders());
     }
 }
