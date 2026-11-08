@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "NEXUS AI",
+  "type": "collection",
+  "ignore": [
+    "node_modules",
+    ".git"
+  ]
+}
