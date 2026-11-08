@@ -1,0 +1,20 @@
+
+name: nexus-ai
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: nexus-ollama
+
+    ports:
+      - "127.0.0.1:11434:11434"
+
+    volumes:
+      - nexus_ollama:/root/.ollama
+
+    restart: unless-stopped
+
+volumes:
+  nexus_ollama:
+    external: true
+    name: nexus_ollama
