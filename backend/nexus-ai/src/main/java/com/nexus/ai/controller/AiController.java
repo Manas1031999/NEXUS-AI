@@ -1,10 +1,15 @@
+
 package com.nexus.ai.controller;
 
+import com.nexus.ai.dto.AiHistoryResponse;
 import com.nexus.ai.dto.AiRequest;
 import com.nexus.ai.dto.AiResponse;
 import com.nexus.ai.dto.ProviderResponse;
 import com.nexus.ai.service.AiProvider;
 import com.nexus.ai.service.AiProviderManager;
+import com.nexus.ai.service.AiRequestHistoryService;
+
+import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +20,13 @@ import org.springframework.web.server.ResponseStatusException;
 public class AiController {
 
     private final AiProviderManager providerManager;
+    private final AiRequestHistoryService historyService;
 
-    public AiController(AiProviderManager providerManager) {
+    public AiController(
+            AiProviderManager providerManager,
+            AiRequestHistoryService historyService) {
         this.providerManager = providerManager;
+        this.historyService = historyService;
     }
 
     @PostMapping("/generate")
@@ -39,7 +48,19 @@ public class AiController {
 
         AiProvider provider = providerManager.getProvider(providerName);
 
-        return provider.generateResponse(request.prompt());
+        long startTime = System.nanoTime();
+
+        AiResponse response = provider.generateResponse(request.prompt());
+
+        long responseTimeMs = (System.nanoTime() - startTime) / 1_000_000;
+
+        historyService.saveHistory(
+                request.prompt(),
+                providerName,
+                response,
+                responseTimeMs);
+
+        return response;
     }
 
     @GetMapping("/providers")
@@ -47,5 +68,11 @@ public class AiController {
 
         return new ProviderResponse(
                 providerManager.getAvailableProviders());
+    }
+
+    @GetMapping("/history")
+    public List<AiHistoryResponse> getAllHistory() {
+
+        return historyService.getAllHistory();
     }
 }
